@@ -36,70 +36,66 @@ models:
       group: finance_team
       access: public
     description: "Grain: one row per payment."
-    semantic_model:
-      enabled: true
-      agg_time_dimension: paid_date
     columns:
       - name: payment_id
         tests: [unique, not_null]
-        entity:
-          type: primary
-          name: payment_id
-
       - name: loan_id
         tests: [not_null]
-        entity:
-          type: foreign
-          name: loan_id
-
       - name: customer_id
-        entity:
-          type: foreign
-          name: customer_id
-
       - name: branch_id
-        entity:
-          type: foreign
-          name: branch_id
-
       - name: loan_product
-        dimension:
-          type: categorical
-
       - name: paid_date
-        granularity: day
-        dimension:
-          type: time
-
       - name: disbursed_amt
-        measure:
-          agg: sum
-          name: disbursed_amount
-
       - name: amount_paid
-        measure:
-          agg: sum
-          name: amount_paid
-
       - name: emi_amount
-        measure:
-          agg: sum
-          name: emi_amount
-
       - name: is_npa
         tests:
           - accepted_values:
               arguments:
                 values: [true, false]
-        measure:
-          agg: sum
-          name: npa_count
-          expr: "case when is_npa then 1 else 0 end"
-
       - name: days_past_due
-        measure:
-          agg: sum
-          name: total_days_past_due
+
+semantic_models:
+  - name: fact_loan_payments
+    description: "Payment-grain semantic model for loan collections."
+    model: ref('fact_loan_payments')
+    defaults:
+      agg_time_dimension: paid_date
+    entities:
+      - name: payment_id
+        type: primary
+      - name: loan_id
+        type: foreign
+      - name: customer_id
+        type: foreign
+      - name: branch_id
+        type: foreign
+    dimensions:
+      - name: loan_product
+        type: categorical
+      - name: paid_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: disbursed_amount
+        agg: sum
+        expr: disbursed_amt
+      - name: amount_paid
+        agg: sum
+        expr: amount_paid
+      - name: emi_amount
+        agg: sum
+        expr: emi_amount
+      - name: npa_count
+        agg: sum
+        expr: "case when is_npa then 1 else 0 end"
+      - name: payment_count
+        agg: count
+        expr: payment_id
+      - name: total_days_past_due
+        agg: sum
+        expr: days_past_due
 
 metrics:
   - name: total_disbursed
@@ -108,25 +104,55 @@ metrics:
     type_params:
       measure: disbursed_amount
 
+  - name: total_amount_paid
+    label: "Total Amount Paid"
+    type: simple
+    type_params:
+      measure: amount_paid
+
+  - name: total_emi_amount
+    label: "Total EMI Amount"
+    type: simple
+    type_params:
+      measure: emi_amount
+
+  - name: total_npa_count
+    label: "Total NPA Count"
+    type: simple
+    type_params:
+      measure: npa_count
+
+  - name: total_payment_count
+    label: "Total Payment Count"
+    type: simple
+    type_params:
+      measure: payment_count
+
+  - name: total_days_past_due_metric
+    label: "Total Days Past Due"
+    type: simple
+    type_params:
+      measure: total_days_past_due
+
   - name: collection_efficiency
     label: "Collection Efficiency %"
     type: ratio
     type_params:
-      numerator: amount_paid
-      denominator: emi_amount
+      numerator: total_amount_paid
+      denominator: total_emi_amount
 
   - name: npa_ratio
     label: "NPA Ratio %"
     type: ratio
     type_params:
-      numerator: npa_count
-      denominator: payment_count
+      numerator: total_npa_count
+      denominator: total_payment_count
 
   - name: avg_days_past_due
     label: "Avg Days Past Due"
     type: derived
     type_params:
-      expr: "total_days_past_due / nullif(payment_count, 0)"
+      expr: "total_days_past_due_metric / nullif(total_payment_count, 0)"
       metrics:
-        - total_days_past_due
-        - payment_count
+        - name: total_days_past_due_metric
+        - name: total_payment_count
