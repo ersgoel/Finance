@@ -1,5 +1,6 @@
 semantic_models:
   - name: fact_loan_payments
+    description: "Payment-grain semantic model for loan collections."
     model: ref('fact_loan_payments')
     defaults:
       agg_time_dimension: paid_date
@@ -23,16 +24,27 @@ semantic_models:
       - name: disbursed_amount
         agg: sum
         expr: disbursed_amt
+        agg_time_dimension: paid_date
       - name: amount_paid
         agg: sum
+        expr: amount_paid
+        agg_time_dimension: paid_date
       - name: emi_amount
         agg: sum
+        expr: emi_amount
+        agg_time_dimension: paid_date
       - name: npa_count
         agg: sum
         expr: case when is_npa then 1 else 0 end
+        agg_time_dimension: paid_date
       - name: payment_count
         agg: count
         expr: payment_id
+        agg_time_dimension: paid_date
+      - name: total_days_past_due
+        agg: sum
+        expr: days_past_due
+        agg_time_dimension: paid_date
 
 metrics:
   - name: total_disbursed
@@ -57,6 +69,9 @@ metrics:
 
   - name: avg_days_past_due
     label: "Avg Days Past Due"
-    type: simple
+    type: derived
     type_params:
-      measure: payment_count   # swap for an avg-type measure on days_past_due in practice
+      expr: "total_days_past_due / nullif(payment_count, 0)"
+      metrics:
+        - name: total_days_past_due
+        - name: payment_count

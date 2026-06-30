@@ -34,7 +34,8 @@ models:
       - name: loan_status
         tests:
           - accepted_values:
-              values: ['Active', 'Closed', 'Written Off']
+              arguments:
+                values: ['Active', 'Closed', 'Written Off']
 
   - name: stg_payments
     columns:
@@ -46,5 +47,6 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('stg_loans')
-              field: loan_id
+              arguments:
+                to: ref('stg_loans')
+                field: loan_id

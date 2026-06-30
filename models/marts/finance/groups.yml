@@ -8,8 +8,9 @@ groups:
 
 models:
   - name: dim_customers
-    group: finance_team
-    access: protected
+    config:
+      group: finance_team
+      access: protected
     columns:
       - name: customer_id
         tests:
@@ -17,8 +18,9 @@ models:
           - not_null
 
   - name: dim_branches
-    group: finance_team
-    access: protected
+    config:
+      group: finance_team
+      access: protected
     columns:
       - name: branch_id
         tests:
@@ -26,8 +28,9 @@ models:
           - not_null
 
   - name: dim_loans
-    group: finance_team
-    access: protected
+    config:
+      group: finance_team
+      access: protected
     columns:
       - name: loan_id
         tests:
@@ -35,8 +38,9 @@ models:
           - not_null
 
   - name: fact_loan_payments
-    group: finance_team
-    access: public
+    config:
+      group: finance_team
+      access: public
     description: "Grain: one row per payment. Joined to loan attributes."
     columns:
       - name: payment_id
@@ -49,4 +53,5 @@ models:
       - name: is_npa
         tests:
           - accepted_values:
-              values: [true, false]
+              arguments:
+                values: [true, false]
