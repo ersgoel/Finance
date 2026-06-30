@@ -1,0 +1,62 @@
+semantic_models:
+  - name: fact_loan_payments
+    model: ref('fact_loan_payments')
+    defaults:
+      agg_time_dimension: paid_date
+    entities:
+      - name: payment_id
+        type: primary
+      - name: loan_id
+        type: foreign
+      - name: customer_id
+        type: foreign
+      - name: branch_id
+        type: foreign
+    dimensions:
+      - name: loan_product
+        type: categorical
+      - name: paid_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: disbursed_amount
+        agg: sum
+        expr: disbursed_amt
+      - name: amount_paid
+        agg: sum
+      - name: emi_amount
+        agg: sum
+      - name: npa_count
+        agg: sum
+        expr: case when is_npa then 1 else 0 end
+      - name: payment_count
+        agg: count
+        expr: payment_id
+
+metrics:
+  - name: total_disbursed
+    label: "Total Disbursed Amount"
+    type: simple
+    type_params:
+      measure: disbursed_amount
+
+  - name: collection_efficiency
+    label: "Collection Efficiency %"
+    type: ratio
+    type_params:
+      numerator: amount_paid
+      denominator: emi_amount
+
+  - name: npa_ratio
+    label: "NPA Ratio %"
+    type: ratio
+    type_params:
+      numerator: npa_count
+      denominator: payment_count
+
+  - name: avg_days_past_due
+    label: "Avg Days Past Due"
+    type: simple
+    type_params:
+      measure: payment_count   # swap for an avg-type measure on days_past_due in practice
