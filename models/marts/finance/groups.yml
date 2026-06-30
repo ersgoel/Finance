@@ -1,0 +1,13 @@
+groups:
+  - name: finance_team
+    owner:
+      name: "Finance Analytics Lead"
+      email: finance-analytics@company.com
+
+models:
+  - name: fact_loan_payments
+    group: finance_team
+    access: public
+  - name: dim_customers
+    group: finance_team
+    access: protected
