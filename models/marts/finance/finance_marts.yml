@@ -55,6 +55,9 @@ models:
                 values: [true, false]
       - name: days_past_due
 
+  - name: metricflow_time_spine
+    description: "Required day-grain time spine for the semantic layer."
+
 semantic_models:
   - name: fact_loan_payments
     description: "Payment-grain semantic model for loan collections."
