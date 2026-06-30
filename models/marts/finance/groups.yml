@@ -1,0 +1,52 @@
+version: 2
+
+groups:
+  - name: finance_team
+    owner:
+      name: "Finance Analytics Lead"
+      email: finance-analytics@company.com
+
+models:
+  - name: dim_customers
+    group: finance_team
+    access: protected
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_branches
+    group: finance_team
+    access: protected
+    columns:
+      - name: branch_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_loans
+    group: finance_team
+    access: protected
+    columns:
+      - name: loan_id
+        tests:
+          - unique
+          - not_null
+
+  - name: fact_loan_payments
+    group: finance_team
+    access: public
+    description: "Grain: one row per payment. Joined to loan attributes."
+    columns:
+      - name: payment_id
+        tests:
+          - unique
+          - not_null
+      - name: loan_id
+        tests:
+          - not_null
+      - name: is_npa
+        tests:
+          - accepted_values:
+              values: [true, false]

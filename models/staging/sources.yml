@@ -1,0 +1,50 @@
+version: 2
+
+sources:
+  - name: lending
+    database: finance_raw
+    schema: lending
+    tables:
+      - name: raw_customers
+      - name: raw_branches
+      - name: raw_loans
+      - name: raw_payments
+
+models:
+  - name: stg_customers
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_branches
+    columns:
+      - name: branch_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_loans
+    columns:
+      - name: loan_id
+        tests:
+          - unique
+          - not_null
+      - name: loan_status
+        tests:
+          - accepted_values:
+              values: ['Active', 'Closed', 'Written Off']
+
+  - name: stg_payments
+    columns:
+      - name: payment_id
+        tests:
+          - unique
+          - not_null
+      - name: loan_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_loans')
+              field: loan_id
