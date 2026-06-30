@@ -1,0 +1,10 @@
+sources:
+  - name: lending
+    database: finance_raw
+    schema: lending
+    tables:
+      - name: raw_customers
+      - name: raw_branches
+      - name: raw_loans
+      - name: raw_payments
+      
